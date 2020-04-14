@@ -1,0 +1,11 @@
+com\lapin\bodymechanic\domain\User.class
+com\lapin\bodymechanic\config\WebSecurityConfig.class
+com\lapin\bodymechanic\controller\RegistrationController.class
+com\lapin\bodymechanic\domain\Message.class
+com\lapin\bodymechanic\config\MvcConfig.class
+com\lapin\bodymechanic\domain\Role.class
+com\lapin\bodymechanic\ServingWebContentApplication.class
+com\lapin\bodymechanic\service\UserService.class
+com\lapin\bodymechanic\controller\MainController.class
+com\lapin\bodymechanic\repository\UserRepository.class
+com\lapin\bodymechanic\repository\MessageRepository.class
