@@ -24,6 +24,7 @@ public class UserController {
     @GetMapping
     public String userList(Model model) {
         model.addAttribute("users", userRepository.findAll());
+
         return "userList";
     }
 
@@ -31,6 +32,7 @@ public class UserController {
     public String userEditForm(@PathVariable User user, Model model) {
         model.addAttribute("user", user);
         model.addAttribute("roles", Role.values());
+
         return "userEdit";
     }
 
@@ -41,6 +43,7 @@ public class UserController {
             @RequestParam("userId") User user
     ) {
         user.setUsername(username);
+
         Set<String> roles = Arrays.stream(Role.values())
                 .map(Role::name)
                 .collect(Collectors.toSet());
@@ -52,6 +55,7 @@ public class UserController {
                 user.getRoles().add(Role.valueOf(key));
             }
         }
+
         userRepository.save(user);
 
         return "redirect:/user";
