@@ -32,12 +32,6 @@ public class User implements UserDetails {
 
     @Getter
     @Setter
-    @Transient
-    @NotBlank(message = "Password confirmation cannot be empty")
-    private String passwordConfirm;
-
-    @Getter
-    @Setter
     private boolean active;
 
     @Getter
