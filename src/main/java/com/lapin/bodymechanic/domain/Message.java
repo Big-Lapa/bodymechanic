@@ -2,9 +2,10 @@ package com.lapin.bodymechanic.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 public class Message {
@@ -16,10 +17,13 @@ public class Message {
 
     @Setter
     @Getter
+    @NotBlank(message = "Please foll the message")
+    @Length(max = 2048, message = "Message too long (more than 2kB")
     private String text;
 
     @Setter
     @Getter
+    @Length(max = 255, message = "Message too long (more than 255")
     private String tag;
 
     @ManyToOne(fetch = FetchType.EAGER)
