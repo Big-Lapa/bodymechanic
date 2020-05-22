@@ -7,7 +7,7 @@
 			</PatternLayout>
 		</Console>
 		<RollingFile name="rollingFile"
-					 fileName="logs/homework1-2log.log"
+					 fileName="logs/bodymechanic.log"
 					 filePattern="logs/app-%d{MM-dd-yyyy}-%i.log.gz">
 			<PatternLayout>
 				<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
