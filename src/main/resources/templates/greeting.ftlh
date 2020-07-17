@@ -2,5 +2,5 @@
 
 <@c.page>
     <h5>Hello, athlete</h5>
-    <div>Это удобный дневник тренировок от спортсмена для спортсменов</div>
+    <div>Here you can share your sporting success</div>
 </@c.page>
