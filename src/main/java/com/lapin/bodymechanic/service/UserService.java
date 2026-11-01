@@ -3,7 +3,7 @@ package com.lapin.bodymechanic.service;
 import com.lapin.bodymechanic.domain.Role;
 import com.lapin.bodymechanic.domain.User;
 import com.lapin.bodymechanic.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,18 +16,21 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final MailService mailService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private MailSender mailSender;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, MailService mailService, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.mailService = mailService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         User user = userRepository.findByUsername(username);
 
         if (user == null) {
@@ -36,14 +39,12 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-
     public boolean addUser(User user) {
         User userFromDb = userRepository.findByUsername(user.getUsername());
 
         if (userFromDb != null) {
             return false;
         }
-
 
         user.setActive(true);
         user.setRoles(Collections.singleton(Role.USER));
@@ -58,15 +59,15 @@ public class UserService implements UserDetailsService {
     }
 
     private void sendMessage(User user) {
-        if (!StringUtils.isEmpty(user.getEmail())) {
+        if (StringUtils.hasLength(user.getEmail())) {
             String message = String.format(
                     "Hello, %s! \n" +
-                            "Welcome to diary Body Mechanic. Please, visit next link: http://localhost:8080/activate/%s",
+                            "Welcome to diary Body Mechanic. Please, visit next link: %s/activate/%s",
                     user.getUsername(),
+                    baseUrl,
                     user.getActivationCode()
             );
-            mailSender.send(user.getEmail(), "Activation code", message);
-
+            mailService.send(user.getEmail(), "Activation code", message);
         }
     }
 
@@ -77,6 +78,7 @@ public class UserService implements UserDetailsService {
         }
 
         user.setActivationCode(null);
+        user.setActive(true);
         userRepository.save(user);
 
         return true;
@@ -113,13 +115,13 @@ public class UserService implements UserDetailsService {
         if (isEmailChanged) {
             user.setEmail(email);
 
-            if (!StringUtils.isEmpty(email)) {
+            if (StringUtils.hasLength(email)) {
                 user.setActivationCode(UUID.randomUUID().toString());
             }
         }
 
-        if (!StringUtils.isEmpty(password)) {
-            user.setPassword(password);
+        if (StringUtils.hasLength(password)) {
+            user.setPassword(passwordEncoder.encode(password));
         }
 
         userRepository.save(user);
