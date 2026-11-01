@@ -1,1 +1,0 @@
-web: java -war target/bodymechanic-1.0.0.war
