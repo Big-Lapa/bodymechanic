@@ -3,7 +3,10 @@ package com.lapin.bodymechanic.service;
 import com.lapin.bodymechanic.domain.Role;
 import com.lapin.bodymechanic.domain.User;
 import com.lapin.bodymechanic.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
+
     private final UserRepository userRepository;
     private final MailService mailService;
     private final PasswordEncoder passwordEncoder;
@@ -67,7 +72,11 @@ public class UserService implements UserDetailsService {
                     baseUrl,
                     user.getActivationCode()
             );
-            mailService.send(user.getEmail(), "Activation code", message);
+            try {
+                mailService.send(user.getEmail(), "Activation code", message);
+            } catch (MailException e) {
+                log.warn("Could not send the activation e-mail to user {}: {}", user.getUsername(), e.getMessage());
+            }
         }
     }
 

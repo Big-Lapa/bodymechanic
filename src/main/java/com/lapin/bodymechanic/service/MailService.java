@@ -10,8 +10,8 @@ public class MailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
-    private String username;
+    @Value("${app.mail.from}")
+    private String from;
 
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -20,7 +20,7 @@ public class MailService {
     public void send(String emailTo, String subject, String message) {
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
-        mailMessage.setFrom(username);
+        mailMessage.setFrom(from);
         mailMessage.setTo(emailTo);
         mailMessage.setSubject(subject);
         mailMessage.setText(message);

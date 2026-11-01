@@ -10,6 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mail.MailSendException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -99,6 +100,35 @@ class UserServiceTest {
         verify(mailService).send(eq("bob@example.org"), anyString(), body.capture());
         assertTrue(body.getValue().contains("https://body.example.org/activate/" + user.getActivationCode()));
         assertFalse(body.getValue().contains("localhost"));
+    }
+
+    @Test
+    void addUser_mailFailureDoesNotFailRegistration() {
+        User user = new User();
+        user.setUsername("bob");
+        user.setPassword("pw");
+        user.setEmail("bob@example.org");
+        when(userRepository.findByUsername("bob")).thenReturn(null);
+        when(passwordEncoder.encode("pw")).thenReturn("hash");
+        doThrow(new MailSendException("smtp is down"))
+                .when(mailService).send(anyString(), anyString(), anyString());
+
+        assertTrue(userService.addUser(user));
+
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void updateProfile_mailFailureDoesNotFailTheUpdate() {
+        User user = new User();
+        user.setEmail("old@example.org");
+        doThrow(new MailSendException("smtp is down"))
+                .when(mailService).send(anyString(), anyString(), anyString());
+
+        assertDoesNotThrow(() -> userService.updateProfile(user, "", "new@example.org"));
+
+        verify(userRepository).save(user);
+        assertEquals("new@example.org", user.getEmail());
     }
 
     @Test

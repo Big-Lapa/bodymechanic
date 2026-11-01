@@ -22,12 +22,12 @@ Requirements: JDK 17+, Maven, Docker (for PostgreSQL).
 
 ```bash
 cp .env.example .env        # fill in the values
-docker compose --env-file .env up -d db
+docker compose --env-file .env up -d     # PostgreSQL and Mailpit
 set -a; . ./.env; set +a    # export the variables (bash)
 mvn spring-boot:run
 ```
 
-Open http://localhost:8080. Set `ADMIN_PASSWORD` to get an `admin` account on startup; there are no default credentials.
+Open http://localhost:8080. Set `ADMIN_PASSWORD` to get an `admin` account on startup; there are no default credentials. Activation e-mails are caught by Mailpit: read them at http://localhost:8025.
 
 ### Configuration
 
@@ -38,7 +38,8 @@ All settings come from environment variables (see [`.env.example`](.env.example)
 | `SPRING_DATASOURCE_URL` / `_USERNAME` / `_PASSWORD` | PostgreSQL connection |
 | `APP_BASE_URL` | Public URL used in activation e-mails |
 | `ADMIN_PASSWORD` | Creates or resets the `admin` user on startup (optional) |
-| `SPRING_MAIL_HOST` / `_PORT` / `_USERNAME` / `_PASSWORD` | SMTP server for activation e-mails |
+| `SPRING_MAIL_HOST` / `_PORT` / `_USERNAME` / `_PASSWORD` / `_STARTTLS` | SMTP server for activation e-mails (default: local Mailpit on `localhost:1025`, any SMTP server works) |
+| `MAIL_FROM` | Sender address of outgoing e-mails |
 | `RECAPTCHA_SECRET` | Google reCAPTCHA v2 secret (the public site key is in `templates/parts/login.ftlh`) |
 | `UPLOAD_PATH` | Directory for uploaded files (default `./uploads`) |
 
