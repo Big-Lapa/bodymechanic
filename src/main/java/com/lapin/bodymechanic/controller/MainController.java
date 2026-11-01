@@ -3,7 +3,6 @@ package com.lapin.bodymechanic.controller;
 import com.lapin.bodymechanic.domain.Message;
 import com.lapin.bodymechanic.domain.User;
 import com.lapin.bodymechanic.repository.MessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -26,31 +25,23 @@ import java.util.UUID;
 @Controller
 public class MainController {
 
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
     @Value("${upload.path}")
     private String uploadPath;
 
-    @GetMapping("/")
-    public String greeting(Map<String, Object> model
-    ) {
+    public MainController(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
+    @GetMapping("/")
+    public String greeting() {
         return "greeting";
     }
 
     @GetMapping("/main")
     public String main(@RequestParam(required = false, defaultValue = "") String filter, Model model) {
-        Iterable<Message> messages = messageRepository.findAll();
-
-        if (filter != null && !filter.isEmpty()) {
-            messages = messageRepository.findByTag(filter);
-        } else {
-            messages = messageRepository.findAll();
-        }
-
-        model.addAttribute("messages", messages);
-        model.addAttribute("filter", filter);
+        addMessages(model, filter);
 
         return "main";
     }
@@ -61,7 +52,8 @@ public class MainController {
             @Valid Message message,
             BindingResult bindingResult,
             Model model,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false, defaultValue = "") String filter
     ) throws IOException {
         message.setAuthor(user);
 
@@ -71,32 +63,39 @@ public class MainController {
             model.addAttribute("message", message);
 
         } else {
-
             saveFile(message, file);
             model.addAttribute("message", null);
 
             messageRepository.save(message);
         }
 
-        Iterable<Message> messages = messageRepository.findAll();
-
-        model.addAttribute("messages", messages);
+        addMessages(model, filter);
 
         return "main";
     }
 
-    private void saveFile(@Valid Message message, @RequestParam("file") MultipartFile file) throws IOException {
-        if (file != null && !file.getOriginalFilename().isEmpty()) {
+    private void addMessages(Model model, String filter) {
+        Iterable<Message> messages = !StringUtils.hasLength(filter)
+                ? messageRepository.findAll()
+                : messageRepository.findByTag(filter);
+
+        model.addAttribute("messages", messages);
+        model.addAttribute("filter", filter);
+    }
+
+    private void saveFile(Message message, MultipartFile file) throws IOException {
+        if (file != null && StringUtils.hasLength(file.getOriginalFilename())) {
             File uploadDir = new File(uploadPath);
 
             if (!uploadDir.exists()) {
-                uploadDir.mkdir();
+                uploadDir.mkdirs();
             }
 
-            String uuidFile = UUID.randomUUID().toString();
-            String resultFilename = uuidFile + "." + file.getOriginalFilename();
+            // keep only the base name: never trust a path sent by the client
+            String originalName = StringUtils.getFilename(StringUtils.cleanPath(file.getOriginalFilename()));
+            String resultFilename = UUID.randomUUID() + "." + originalName;
 
-            file.transferTo(new File(uploadPath + "/" + resultFilename));
+            file.transferTo(new File(uploadDir, resultFilename).getAbsoluteFile());
 
             message.setFilename(resultFilename);
         }
@@ -128,11 +127,11 @@ public class MainController {
             @RequestParam("file") MultipartFile file
     ) throws IOException {
         if (message.getAuthor().equals(currentUser)) {
-            if (!StringUtils.isEmpty(text)) {
+            if (StringUtils.hasLength(text)) {
                 message.setText(text);
             }
 
-            if (!StringUtils.isEmpty(tag)) {
+            if (StringUtils.hasLength(tag)) {
                 message.setTag(tag);
             }
 
