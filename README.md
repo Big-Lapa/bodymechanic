@@ -14,7 +14,7 @@ A small training-diary web application: sign up, post notes with tags and attach
 
 ## Stack
 
-Java 17 · Spring Boot 2.7 (Web, Security, Data JPA, Session JDBC, Mail, Validation) · Freemarker · PostgreSQL · Flyway · Maven · Bootstrap 4
+Java 17 · Spring Boot 4.1 (Web MVC, Security, Data JPA, Session JDBC, Mail, Validation) · Freemarker · PostgreSQL · Flyway · Maven · Bootstrap 4
 
 ## Run locally
 
