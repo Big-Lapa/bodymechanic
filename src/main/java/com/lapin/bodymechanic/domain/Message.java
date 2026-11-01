@@ -10,7 +10,8 @@ import jakarta.validation.constraints.NotBlank;
 @Entity
 public class Message {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "message_id_gen")
+    @SequenceGenerator(name = "message_id_gen", sequenceName = "hibernate_sequence", allocationSize = 1)
     @Setter
     @Getter
     private Long id;

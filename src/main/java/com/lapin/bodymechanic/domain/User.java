@@ -17,7 +17,8 @@ import java.util.Set;
 @Table(name = "m_user")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id_gen")
+    @SequenceGenerator(name = "user_id_gen", sequenceName = "hibernate_sequence", allocationSize = 1)
     @Getter
     @Setter
     private Long id;
